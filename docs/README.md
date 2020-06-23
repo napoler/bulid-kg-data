@@ -22,3 +22,11 @@ python tagSchemeConverter.py BIO2BMOES  dev.txt data.dev
 
 
 ```
+
+生成对应的ｌａｂｅｌ列表
+
+```
+
+python creat_label.py data/Bmes/train.txt data/Bmes/labels.txt
+
+```
