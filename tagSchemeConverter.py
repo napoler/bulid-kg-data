@@ -6,11 +6,53 @@
 
 
 """
-    convert NER/Chunking tag schemes, i.e. BIO->BIOES, BIOES->BIO, IOB->BIO, IOB->BIOES
+    convert NER/Chunking tag schemes, i.e. BIO->BIOES, BIOES->BIO, IOB->BIO, IOB->BIOES,BIO2BMOES
 """
 from __future__ import print_function
 
 import sys
+
+# python tagSchemeConverter.py BIO2BMOES /mnt/data/dev/github/构建实体标注数据bulid-kg-data/NER_corpus_chinese/ordata/dev.txt data.dev
+
+
+
+def BIO2BMOES(input_file, output_file):
+    print("Convert BIO -> BMOES for file:", input_file)
+    with open(input_file,'r') as in_file:
+        fins = in_file.readlines()
+    fout = open(output_file,'w')
+    words = []
+    labels = []
+    for line in fins:
+        if len(line) < 3:
+            sent_len = len(words)
+            for idx in range(sent_len):
+                if "-" not in labels[idx]:
+                    fout.write(words[idx]+" "+labels[idx]+"\n")
+                else:
+                    # print("labels[idx]",idx,labels[idx])
+                    # labels[idx]=labels[idx].replace("I-","M-")
+
+                    label_type = labels[idx].split('-')[-1]
+                    if "B-" in labels[idx]:
+                        if (idx == sent_len - 1) or ("I-" not in labels[idx+1]):
+                            fout.write(words[idx]+" S-"+label_type+"\n")
+                        else:
+                            fout.write(words[idx]+" B-"+label_type+"\n")
+                    elif "I-" in labels[idx]:
+                        if (idx == sent_len - 1) or ("I-" not in labels[idx+1]):
+                            fout.write(words[idx]+" E-"+label_type+"\n")
+                        else:
+                            fout.write(words[idx]+" M-"+label_type+"\n")
+            fout.write('\n')
+            words = []
+            labels = []
+        else:
+            pair = line.strip('\n').split()
+            words.append(pair[0])
+            labels.append(pair[-1].upper())
+    fout.close()
+    print("BIOES file generated:", output_file)
 
 
 def BIO2BIOES(input_file, output_file):
@@ -47,8 +89,6 @@ def BIO2BIOES(input_file, output_file):
             labels.append(pair[-1].upper())
     fout.close()
     print("BIOES file generated:", output_file)
-
-
 
 def BIOES2BIO(input_file, output_file):
     print("Convert BIOES -> BIO for file:", input_file)
@@ -134,10 +174,12 @@ if __name__ == '__main__':
         IOB2BIO(sys.argv[2],sys.argv[3])
     elif sys.argv[1].upper() == "BIO2BIOES":
         BIO2BIOES(sys.argv[2],sys.argv[3])
+    elif sys.argv[1].upper() == "BIO2BMOES":
+        BIO2BMOES(sys.argv[2],sys.argv[3])
     elif sys.argv[1].upper() == "BIOES2BIO":
         BIOES2BIO(sys.argv[2],sys.argv[3])
     elif sys.argv[1].upper() == "IOB2BIOES":
         IOB2BIO(sys.argv[2],"temp")
         BIO2BIOES("temp",sys.argv[3])
     else:
-        print("Argument error: sys.argv[1] should belongs to \"IOB2BIO/BIO2BIOES/BIOES2BIO/IOB2BIOES\"")
+        print("Argument error: sys.argv[1] should belongs to \"IOB2BIO/BIO2BIOES/BIOES2BIO/IOB2BIOES/BIO2BMOES\"")
