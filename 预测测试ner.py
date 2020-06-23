@@ -8,7 +8,7 @@ from tkitMarker_bert import Marker
 Ner_Marker=Marker(model_path="./model/tmarker_bert_ner/")
 
 Ner_Marker.load_model()
-
+import os
 
 from pyltp import Parser
 from pyltp import SementicRoleLabeller
